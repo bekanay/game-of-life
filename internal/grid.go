@@ -32,6 +32,22 @@ func (g *Grid) InitGrid(w, h int) {
 	g.width = w
 }
 
+func (g *Grid) InitFileGrid(fileGrid [][]rune) {
+	g.height = len(fileGrid)
+	g.gameMap = make([][]rune, g.height)
+	for id, rowFile := range fileGrid {
+		row := make([]rune, 0)
+		for _, ch := range rowFile {
+			if !(ch == '#' || ch == '.') {
+				fmt.Println("Incorrect character: " + string(ch) + "\n")
+				os.Exit(0)
+			}
+			row = append(row, ch)
+		}
+		g.gameMap[id] = row
+	}
+}
+
 func (g *Grid) GenerateRandomGrid() {
 	for i := 0; i < g.height; i++ {
 		for j := 0; j < g.width; j++ {

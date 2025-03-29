@@ -1,9 +1,11 @@
 package game
 
 import (
+	"bufio"
 	"crunch03/internal"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -48,8 +50,34 @@ func NewGame(flags map[string]interface{}) (*game, error) {
 				game.delay = time.Millisecond * time.Duration(v)
 			}
 		case "file":
-			if v, ok := val.(bool); ok {
-				game.colored = v
+			if v, ok := val.(string); ok {
+				fileInfo, err := os.Stat(v)
+				if err != nil {
+					return nil, err
+				}
+
+				if fileInfo.Size() == 0 {
+					fmt.Println("The file is empty.")
+				}
+
+				file, err := os.Open(v)
+				if err != nil {
+					return nil, err
+				}
+				defer file.Close()
+
+				scanner := bufio.NewScanner(file)
+				grid := internal.NewGrid()
+				fileGrid := make([][]rune, 0)
+				for scanner.Scan() {
+					line := scanner.Text()
+					row := make([]rune, 0)
+					for _, ch := range line {
+						row = append(row, ch)
+					}
+					fileGrid = append(fileGrid, row)
+				}
+				grid.InitFileGrid(fileGrid)
 			}
 		case "random":
 			if values, ok := val.([]int); ok && len(values) == 2 {
@@ -78,6 +106,7 @@ func (g *game) CheckFlags() {
 
 func (g *game) StartGame() {
 	for g.grid.LivingCells > 0 {
+
 		g.grid.PrintGrid()
 		time.Sleep(g.delay)
 	}
