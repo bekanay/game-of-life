@@ -56,12 +56,14 @@ func NewGame(flags map[string]interface{}) (*game, error) {
 				grid := internal.NewGrid()
 				grid.InitGrid(values[0], values[1])
 				grid.GenerateRandomGrid()
-				fmt.Println(grid)
 				game.grid = grid
 			}
 		default:
 			return nil, errors.New("Warning: Unknown flag " + key)
 		}
+	}
+	if game.fullscreen {
+		game.grid.GenerateFullScreen()
 	}
 	game.flags = flags
 	return &game, nil
@@ -75,7 +77,6 @@ func (g *game) CheckArgs() {
 }
 
 func (g *game) StartGame() {
-	defer fmt.Print("\033[?25h") // back cursor
 	fmt.Println("Game is starting")
 	fmt.Println(g.grid.LivingCells)
 	for g.grid.LivingCells > 0 {

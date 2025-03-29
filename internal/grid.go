@@ -3,6 +3,9 @@ package internal
 import (
 	"fmt"
 	"math/rand"
+	"os"
+
+	"golang.org/x/term"
 )
 
 type Grid struct {
@@ -42,9 +45,20 @@ func (g *Grid) GenerateRandomGrid() {
 	}
 }
 
+func (g *Grid) GenerateFullScreen() {
+	width, height, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		panic("Failed to get terminal size")
+	}
+
+	g.InitGrid(width, height)
+	g.GenerateRandomGrid()
+}
+
 func (g *Grid) PrintGrid() {
 	fmt.Print("\033[H\033[2J") // clear terminal
 	fmt.Print("\033[?25l")     // remove cursor
+
 	for i := 0; i < g.height; i++ {
 		for j := 0; j < g.width; j++ {
 			fmt.Print(string(g.gameMap[i][j]))
