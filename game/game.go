@@ -63,13 +63,13 @@ func NewGame(flags map[string]interface{}) (*game, error) {
 		}
 	}
 	if game.fullscreen {
-		game.grid.GenerateFullScreen()
+		game.grid.AdjustToTerminalSize()
 	}
 	game.flags = flags
 	return &game, nil
 }
 
-func (g *game) CheckArgs() {
+func (g *game) CheckFlags() {
 	for key, val := range g.flags {
 		fmt.Print("key: " + key + " val: ")
 		fmt.Println(val)
@@ -77,8 +77,6 @@ func (g *game) CheckArgs() {
 }
 
 func (g *game) StartGame() {
-	fmt.Println("Game is starting")
-	fmt.Println(g.grid.LivingCells)
 	for g.grid.LivingCells > 0 {
 		g.grid.PrintGrid()
 		time.Sleep(g.delay)

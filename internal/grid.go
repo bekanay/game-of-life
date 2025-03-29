@@ -45,19 +45,53 @@ func (g *Grid) GenerateRandomGrid() {
 	}
 }
 
-func (g *Grid) GenerateFullScreen() {
+func (g *Grid) AdjustToTerminalSize() {
 	width, height, err := term.GetSize(int(os.Stdout.Fd()))
+	width = width/2 + 1
 	if err != nil {
-		panic("Failed to get terminal size")
+		fmt.Fprintf(os.Stderr, "Error getting terminal size: %v\n", err)
+		return
 	}
 
-	g.InitGrid(width, height)
-	g.GenerateRandomGrid()
+	if g.height < height {
+		for g.height < height {
+			g.AddRow()
+		}
+	} else if g.height > height {
+		g.gameMap = g.gameMap[:height]
+		g.height = height
+	}
+
+	if g.width < width {
+		for g.width < width {
+			g.AddColumn()
+		}
+	} else if g.width > width {
+		for i := range g.gameMap {
+			g.gameMap[i] = g.gameMap[i][:width]
+		}
+		g.width = width
+	}
+}
+
+func (g *Grid) AddRow() {
+	newRow := make([]rune, g.width)
+	for i := 0; i < g.width; i++ {
+		newRow[i] = g.EmptyChar
+	}
+	g.gameMap = append(g.gameMap, newRow)
+	g.height++
+}
+
+func (g *Grid) AddColumn() {
+	for i := 0; i < g.height; i++ {
+		g.gameMap[i] = append(g.gameMap[i], g.EmptyChar)
+	}
+	g.width++
 }
 
 func (g *Grid) PrintGrid() {
-	fmt.Print("\033[H\033[2J") // clear terminal
-	fmt.Print("\033[?25l")     // remove cursor
+	clearScreen()
 
 	for i := 0; i < g.height; i++ {
 		for j := 0; j < g.width; j++ {
@@ -70,4 +104,8 @@ func (g *Grid) PrintGrid() {
 			fmt.Println()
 		}
 	}
+}
+
+func clearScreen() {
+	fmt.Print("\033[H\033[2J")
 }
