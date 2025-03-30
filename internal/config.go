@@ -19,6 +19,7 @@ type Config struct {
 	Colored     bool
 	flags       map[string]interface{}
 	File        *os.File
+	CustomCells []rune
 }
 
 func InitConfig(flags map[string]interface{}) (*Config, error) {
@@ -70,6 +71,12 @@ func InitConfig(flags map[string]interface{}) (*Config, error) {
 				config.Width = values[0]
 				config.Height = values[1]
 				config.Random = true
+			}
+		case "custom-cells":
+			if values, ok := val.([]rune); ok {
+				customCells := make([]rune, 0)
+				customCells = append(customCells, values...)
+				config.CustomCells = append(config.CustomCells, customCells...)
 			}
 		default:
 			return nil, errors.New("Warning: Unknown flag " + key)
