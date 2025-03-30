@@ -15,37 +15,36 @@ func InitFlags() (map[string]interface{}, error) {
 	for _, arg := range args {
 		switch arg {
 		case "--help":
-			if _, ok := result["help"]; !ok {
+			if _, exist := result["help"]; !exist {
 				helpFlag()
-				result["help"] = true
 			}
 		case "--verbose":
-			if _, ok := result["verbose"]; !ok {
+			if _, exist := result["verbose"]; !exist {
 				result["verbose"] = true
 			}
 		case "--edges-portal":
-			if _, ok := result["edges-portal"]; !ok {
+			if _, exist := result["edges-portal"]; !exist {
 				result["edges-portal"] = true
 			}
 		case "--fullscreen":
-			if _, ok := result["fullscreen"]; !ok {
+			if _, exist := result["fullscreen"]; !exist {
 				result["fullscreen"] = true
 			}
 		case "--footprints":
-			if _, ok := result["footprints"]; !ok {
+			if _, exist := result["footprints"]; !exist {
 				result["footprints"] = true
 			}
 		case "--colored":
-			if _, ok := result["colored"]; !ok {
+			if _, exist := result["colored"]; !exist {
 				result["colored"] = true
 			}
 		default:
 			if len(arg) > 15 {
 				if arg[:15] == "--custom-cells=" {
-					if _, ok := result["random"]; !ok {
+					if _, exist := result["custom-cells"]; !exist {
 						chars := arg[15:]
 						if len(chars) != 3 {
-							return map[string]interface{}{}, errors.New("incorrect number of chars, expected 2")
+							return map[string]interface{}{}, errors.New("incorrect number of chars, expected 3")
 						}
 						charsRunes := []rune(chars)
 
@@ -54,6 +53,7 @@ func InitFlags() (map[string]interface{}, error) {
 					continue
 				}
 			}
+
 			if len(arg) > 11 {
 				if arg[:11] == "--delay-ms=" {
 					if result["delay-ms"] == 2500 {
@@ -67,28 +67,11 @@ func InitFlags() (map[string]interface{}, error) {
 				}
 			}
 
-			if len(arg) > (7) {
-				if arg[:7] == "--file=" {
-					_, ok := result["random"]
-					_, ok1 := result["file"]
-
-					if !ok && !ok1 {
-						result["file"] = arg[7:]
-						file, err := os.Open(arg[7:])
-						if err != nil {
-							return nil, err
-						}
-						defer file.Close()
-					}
-					continue
-				}
-			}
-
 			if len(arg) > (9) {
 				if arg[:9] == "--random=" {
-					_, ok := result["random"]
-					_, ok1 := result["file"]
-					if !ok && !ok1 {
+					_, exist := result["random"]
+					_, exist1 := result["file"]
+					if !exist && !exist1 {
 						arr := make([]int, 0)
 						num := ""
 						for _, ch := range arg[9:] {
@@ -123,6 +106,24 @@ func InitFlags() (map[string]interface{}, error) {
 					continue
 				}
 			}
+
+			if len(arg) > (7) {
+				if arg[:7] == "--file=" {
+					_, exist := result["random"]
+					_, exist1 := result["file"]
+
+					if !exist && !exist1 {
+						result["file"] = arg[7:]
+						file, err := os.Open(arg[7:])
+						if err != nil {
+							return nil, err
+						}
+						defer file.Close()
+					}
+					continue
+				}
+			}
+
 			return map[string]interface{}{}, errors.New("non-existent flag is entered: " + arg)
 		}
 	}
