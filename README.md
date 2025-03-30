@@ -34,7 +34,7 @@ Crunch03 supports several command-line options for configuring the simulation:
 go run main.go --random=20x10 --verbose --delay-ms=1000
 go run main.go --file=grid.txt --fullscreen --colored
 go run main.go --random=30x15 --edges-portal --footprints --custom-cells=██·
-
+```
 ## Configuration File Format
 
 If you choose to load the grid from a file, the format must adhere to the following rules:
