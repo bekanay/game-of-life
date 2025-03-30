@@ -3,94 +3,50 @@ package game
 import (
 	"bufio"
 	"crunch03/internal"
-	"errors"
 	"fmt"
-	"os"
 	"time"
 )
 
 type game struct {
-	verbose     bool
-	delay       time.Duration
-	edgePortals bool
-	fullscreen  bool
-	footprints  bool
-	colored     bool
-	flags       map[string]interface{}
-	file        string
-	grid        internal.Grid
+	config *internal.Config
+	flags  map[string]interface{}
+	file   string
+	grid   internal.Grid
 }
 
 func NewGame(flags map[string]interface{}) (*game, error) {
 	var game game
-	for key, val := range flags {
-		switch key {
-		case "verbose":
-			if v, ok := val.(bool); ok {
-				game.verbose = v
-			}
-		case "edges-portal":
-			if v, ok := val.(bool); ok {
-				game.edgePortals = v
-			}
-		case "fullscreen":
-			if v, ok := val.(bool); ok {
-				game.fullscreen = v
-			}
-		case "footprints":
-			if v, ok := val.(bool); ok {
-				game.footprints = v
-			}
-		case "colored":
-			if v, ok := val.(bool); ok {
-				game.colored = v
-			}
-		case "delay-ms":
-			if v, ok := val.(int); ok {
-				game.delay = time.Millisecond * time.Duration(v)
-			}
-		case "file":
-			if v, ok := val.(string); ok {
-				fileInfo, err := os.Stat(v)
-				if err != nil {
-					return nil, err
-				}
+	var err error
+	game.config, err = internal.InitConfig()
 
-				if fileInfo.Size() == 0 {
-					fmt.Println("The file is empty.")
-				}
-
-				file, err := os.Open(v)
-				if err != nil {
-					return nil, err
-				}
-				defer file.Close()
-
-				scanner := bufio.NewScanner(file)
-				grid := internal.NewGrid()
-				fileGrid := make([][]rune, 0)
-				for scanner.Scan() {
-					line := scanner.Text()
-					row := make([]rune, 0)
-					for _, ch := range line {
-						row = append(row, ch)
-					}
-					fileGrid = append(fileGrid, row)
-				}
-				grid.InitFileGrid(fileGrid)
-			}
-		case "random":
-			if values, ok := val.([]int); ok && len(values) == 2 {
-				grid := internal.NewGrid()
-				grid.InitGrid(values[0], values[1])
-				grid.GenerateRandomGrid()
-				game.grid = grid
-			}
-		default:
-			return nil, errors.New("Warning: Unknown flag " + key)
-		}
+	if err != nil {
+		return nil, err
 	}
-	if game.fullscreen {
+
+	if game.config.random {
+		grid := internal.NewGrid()
+		grid.InitGrid(game.config.width, game.config.height)
+		grid.GenerateRandomGrid()
+		game.grid = grid
+	}
+
+	if game.config.file != nil {
+		scanner := bufio.NewScanner(game.config.file)
+		grid := internal.NewGrid()
+		fileGrid := make([][]rune, 0)
+		for scanner.Scan() {
+			line := scanner.Text()
+			row := make([]rune, 0)
+			for _, ch := range line {
+				row = append(row, ch)
+			}
+			fileGrid = append(fileGrid, row)
+		}
+		grid.InitFileGrid(fileGrid)
+		game.config.file.Close()
+	}
+
+	if game.config.fullscreen {
 		game.grid.AdjustToTerminalSize()
 	}
 	game.flags = flags
@@ -108,6 +64,6 @@ func (g *game) StartGame() {
 	for g.grid.LivingCells > 0 {
 
 		g.grid.PrintGrid()
-		time.Sleep(g.delay)
+		time.Sleep(g.config.delay)
 	}
 }
