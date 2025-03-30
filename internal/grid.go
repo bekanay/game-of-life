@@ -5,13 +5,15 @@ import (
 	"math/rand"
 	"os"
 
+	"crunch03/utils"
+
 	"golang.org/x/term"
 )
 
 type Grid struct {
 	gameMap     [][]rune
-	height      int
-	width       int
+	Height      int
+	Width       int
 	LivingCells int
 	LivingChar  rune
 	EmptyChar   rune
@@ -28,13 +30,13 @@ func (g *Grid) InitGrid(w, h int) {
 	}
 	g.LivingChar = '×'
 	g.EmptyChar = '·'
-	g.height = h
-	g.width = w
+	g.Height = h
+	g.Width = w
 }
 
 func (g *Grid) InitFileGrid(fileGrid [][]rune) {
-	g.height = len(fileGrid)
-	g.gameMap = make([][]rune, g.height)
+	g.Height = len(fileGrid)
+	g.gameMap = make([][]rune, g.Height)
 	for id, rowFile := range fileGrid {
 		row := make([]rune, 0)
 		for _, ch := range rowFile {
@@ -49,8 +51,8 @@ func (g *Grid) InitFileGrid(fileGrid [][]rune) {
 }
 
 func (g *Grid) GenerateRandomGrid() {
-	for i := 0; i < g.height; i++ {
-		for j := 0; j < g.width; j++ {
+	for i := 0; i < g.Height; i++ {
+		for j := 0; j < g.Width; j++ {
 			if rand.Intn(2) == 1 {
 				g.gameMap[i][j] = g.LivingChar
 				g.LivingCells++
@@ -61,7 +63,7 @@ func (g *Grid) GenerateRandomGrid() {
 	}
 }
 
-func (g *Grid) AdjustToTerminalSize() {
+func (g *Grid) AdjustToTerminalSize(config *Config) {
 	width, height, err := term.GetSize(int(os.Stdout.Fd()))
 	width = width/2 + 1
 	if err != nil {
@@ -69,54 +71,63 @@ func (g *Grid) AdjustToTerminalSize() {
 		return
 	}
 
-	if g.height < height {
-		for g.height < height {
+	if g.Height < height {
+		for g.Height < height {
 			g.AddRow()
 		}
-	} else if g.height > height {
+	} else if g.Height > height {
 		g.gameMap = g.gameMap[:height]
-		g.height = height
+		g.Height = height
 	}
 
-	if g.width < width {
-		for g.width < width {
+	if g.Width < width {
+		for g.Width < width {
 			g.AddColumn()
 		}
-	} else if g.width > width {
+	} else if g.Width > width {
 		for i := range g.gameMap {
 			g.gameMap[i] = g.gameMap[i][:width]
 		}
-		g.width = width
+		g.Width = width
+	}
+	if config.Fullscreen && config.Verbose && g.Height > 8 {
+		g.Height -= 5
 	}
 }
 
 func (g *Grid) AddRow() {
-	newRow := make([]rune, g.width)
-	for i := 0; i < g.width; i++ {
+	newRow := make([]rune, g.Width)
+	for i := 0; i < g.Width; i++ {
 		newRow[i] = g.EmptyChar
 	}
 	g.gameMap = append(g.gameMap, newRow)
-	g.height++
+	g.Height++
 }
 
 func (g *Grid) AddColumn() {
-	for i := 0; i < g.height; i++ {
+	for i := 0; i < g.Height; i++ {
 		g.gameMap[i] = append(g.gameMap[i], g.EmptyChar)
 	}
-	g.width++
+	g.Width++
 }
 
-func (g *Grid) PrintGrid() {
+func (g *Grid) PrintGrid(config *Config, tick int) {
 	clearScreen()
+	if config.Verbose {
+		fmt.Printf("Tick: %d\n", tick)
+		fmt.Printf("Grid Size: %dx%d\n", g.Width, g.Height)
+		fmt.Printf("Live Cells: %d\n", g.LivingCells)
+		fmt.Printf("DelayMs: %dms\n\n", config.Delay.Abs().Milliseconds())
+	}
 
-	for i := 0; i < g.height; i++ {
-		for j := 0; j < g.width; j++ {
+	for i := 0; i < g.Height; i++ {
+		for j := 0; j < g.Width; j++ {
 			fmt.Print(string(g.gameMap[i][j]))
-			if j != g.width-1 {
+			if j != g.Width-1 {
 				fmt.Print(" ")
 			}
 		}
-		if i != g.height-1 {
+		if i != g.Height-1 {
 			fmt.Println()
 		}
 	}
@@ -124,4 +135,26 @@ func (g *Grid) PrintGrid() {
 
 func clearScreen() {
 	fmt.Print("\033[H\033[2J")
+}
+
+func (g *Grid) UpdateGird(config *Config) {
+	newGrid := make([][]rune, g.Height)
+
+	for i := 0; i < g.Height; i++ {
+		newGrid[i] = make([]rune, g.Width)
+	}
+	g.LivingCells = 0
+
+	for i := 0; i < g.Height; i++ {
+		for j := 0; j < g.Width; j++ {
+			if utils.IsAlive(g.gameMap, i, j, g.LivingChar, config.EdgePortals) {
+				newGrid[i][j] = g.LivingChar
+				g.LivingCells++
+			} else {
+				newGrid[i][j] = g.EmptyChar
+			}
+		}
+	}
+
+	g.gameMap = newGrid
 }

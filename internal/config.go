@@ -8,17 +8,17 @@ import (
 )
 
 type Config struct {
-	width       int
-	height      int
-	random      bool
-	verbose     bool
-	delay       time.Duration
-	edgePortals bool
-	fullscreen  bool
-	footprints  bool
-	colored     bool
+	Width       int
+	Height      int
+	Random      bool
+	Verbose     bool
+	Delay       time.Duration
+	EdgePortals bool
+	Fullscreen  bool
+	Footprints  bool
+	Colored     bool
 	flags       map[string]interface{}
-	file        *os.File
+	File        *os.File
 }
 
 func InitConfig(flags map[string]interface{}) (*Config, error) {
@@ -27,27 +27,27 @@ func InitConfig(flags map[string]interface{}) (*Config, error) {
 		switch key {
 		case "verbose":
 			if v, ok := val.(bool); ok {
-				config.verbose = v
+				config.Verbose = v
 			}
 		case "edges-portal":
 			if v, ok := val.(bool); ok {
-				config.edgePortals = v
+				config.EdgePortals = v
 			}
 		case "fullscreen":
 			if v, ok := val.(bool); ok {
-				config.fullscreen = v
+				config.Fullscreen = v
 			}
 		case "footprints":
 			if v, ok := val.(bool); ok {
-				config.footprints = v
+				config.Footprints = v
 			}
 		case "colored":
 			if v, ok := val.(bool); ok {
-				config.colored = v
+				config.Colored = v
 			}
 		case "delay-ms":
 			if v, ok := val.(int); ok {
-				config.delay = time.Millisecond * time.Duration(v)
+				config.Delay = time.Millisecond * time.Duration(v)
 			}
 		case "file":
 			if v, ok := val.(string); ok {
@@ -60,16 +60,16 @@ func InitConfig(flags map[string]interface{}) (*Config, error) {
 					fmt.Println("The file is empty.")
 				}
 
-				config.file, err = os.Open(v)
+				config.File, err = os.Open(v)
 				if err != nil {
 					return nil, err
 				}
 			}
 		case "random":
 			if values, ok := val.([]int); ok && len(values) == 2 {
-				config.width = values[0]
-				config.height = values[1]
-				config.random = true
+				config.Width = values[0]
+				config.Height = values[1]
+				config.Random = true
 			}
 		default:
 			return nil, errors.New("Warning: Unknown flag " + key)

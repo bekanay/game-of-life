@@ -1,9 +1,10 @@
 package main
 
 import (
+	"fmt"
+
 	"crunch03/game"
 	"crunch03/internal"
-	"fmt"
 )
 
 func main() {
@@ -16,5 +17,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(flags["verbose"])
+
 	game.StartGame()
 }

@@ -55,7 +55,10 @@ func InitFlags() (map[string]interface{}, error) {
 
 			if len(arg) > (7) {
 				if arg[:7] == "--file=" {
-					if _, ok := result["file"]; !ok {
+					_, ok := result["random"]
+					_, ok1 := result["file"]
+
+					if !ok && !ok1 {
 						result["file"] = arg[7:]
 						_, err := os.Open(arg[7:])
 						if err != nil {
@@ -68,7 +71,9 @@ func InitFlags() (map[string]interface{}, error) {
 
 			if len(arg) > (9) {
 				if arg[:9] == "--random=" {
-					if _, ok := result["random"]; !ok {
+					_, ok := result["random"]
+					_, ok1 := result["file"]
+					if !ok && !ok1 {
 						arr := make([]int, 0)
 						num := ""
 						for _, ch := range arg[9:] {
@@ -110,7 +115,8 @@ func InitFlags() (map[string]interface{}, error) {
 }
 
 func helpFlag() {
-	fmt.Println("Usage: go run main.go [options]\n")
+	fmt.Println("Usage: go run main.go [options]")
+	fmt.Println()
 	fmt.Println("Options:")
 	fmt.Println("  --help        : Show the help message and exit")
 	fmt.Println("  --verbose     : Display detailed information about the simulation, including grid size, number of ticks, speed, and map name")
