@@ -2,7 +2,6 @@ package internal
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"time"
 )
@@ -58,7 +57,7 @@ func InitConfig(flags map[string]interface{}) (*Config, error) {
 				}
 
 				if fileInfo.Size() == 0 {
-					fmt.Println("The file is empty.")
+					return nil, errors.New("the file is empty")
 				}
 
 				config.File, err = os.Open(v)

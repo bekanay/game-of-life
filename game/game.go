@@ -19,6 +19,7 @@ type game struct {
 func NewGame(flags map[string]interface{}) (*game, error) {
 	var game game
 	var err error
+
 	game.config, err = internal.InitConfig(flags)
 	if err != nil {
 		return nil, err
@@ -31,10 +32,8 @@ func NewGame(flags map[string]interface{}) (*game, error) {
 	}
 
 	if game.config.Random {
-		grid := internal.NewGrid()
-		grid.InitGrid(game.config.Width, game.config.Height)
-		grid.GenerateRandomGrid()
-		game.grid = grid
+		game.grid.InitGrid(game.config.Width, game.config.Height)
+		game.grid.GenerateRandomGrid()
 	}
 
 	if game.config.File != nil {
@@ -45,7 +44,10 @@ func NewGame(flags map[string]interface{}) (*game, error) {
 	}
 
 	if game.config.Height == 0 && game.config.Width == 0 {
-		UserInputGrid(&game)
+		err := UserInputGrid(&game)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if game.config.Fullscreen {
 		game.grid.AdjustToTerminalSize(game.config)
@@ -68,8 +70,9 @@ func (g *game) StartGame() {
 	for g.grid.LivingCells > 0 {
 		time.Sleep(g.config.Delay)
 		g.grid.UpdateGird(g.config)
-		g.grid.PrintGrid(g.config, tick)
 		tick++
+		g.grid.PrintGrid(g.config, tick)
+
 	}
 	fmt.Println()
 }
@@ -154,7 +157,7 @@ func UserInputGrid(g *game) error {
 		}
 
 		if len(line) != width {
-			return errors.New("Invalid size of the line: " + strconv.Itoa(len(line)))
+			return errors.New("Invalid size of the line, expected: " + strconv.Itoa(width))
 		}
 
 		row := make([]rune, 0)
