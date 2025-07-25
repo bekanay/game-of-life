@@ -1,7 +1,7 @@
-# Crunch03 - A Cellular Automaton Simulator
+# A Cellular Automaton Simulator
 
 ## Overview
-Crunch03 is a simple cellular automaton simulation inspired by Conway's Game of Life, where cells on a grid evolve over time based on their neighbors. This implementation allows for various configuration options such as random grid generation, custom cells, and the ability to load an initial grid from a file. It includes support for visual enhancements like colored cells and fullscreen mode.
+Simple cellular automaton simulation inspired by Conway's Game of Life, where cells on a grid evolve over time based on their neighbors. This implementation allows for various configuration options such as random grid generation, custom cells, and the ability to load an initial grid from a file. It includes support for visual enhancements like colored cells and fullscreen mode.
 
 ## Features
 - **Grid Size**: Customize the grid's width and height.
